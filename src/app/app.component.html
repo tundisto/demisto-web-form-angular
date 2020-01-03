@@ -1,0 +1,227 @@
+<ng-container *ngIf="loggedInUser && clientOptions && employeeForm.homeAddress.country && adGroups">
+
+  <div class="formContainer">
+    <img src="/assets/demisto-logo-1.png" style="margin-top: 1em;">
+    
+    <div style="margin-top: 1em; margin-right: 1em; float: right;">Logged in as: <span style="font-weight: bold;"> {{loggedInUser.username}}</span></div>
+
+    <h1 class="bodyHeader">
+      Create a New Employee
+    </h1>
+
+
+    <h3 style="margin-top: 0;">This sample Angular app creates a Demisto incident through use of a web-based form.  Its purpose is to trigger a playbook which would perform some automated actions associated with hiring a new employee behind the scenes.</h3>
+
+    <p><span style="font-weight: bold;">PLEASE NOTE:</span> This is a simplistic, sample implementation, for reference purposes only.  It is <u><b>NOT</b></u> intended for use in production.</p>
+
+    <h1 class="bodyHeader" style="color: red;">CONSIDER THIS APP TO BE INSECURE!!!</h1>
+
+    <p-card header="Demisto Parameters" subheader="Use this section to initialise the server's connection to the Demisto API.  The configuration will be saved by the server.">
+      <form>
+
+        <div class="demistoForm">
+          
+          <!-- Demisto Base URL -->
+          <div>
+            <span class="ui-float-label">
+              <input pInputText type="url" id="url" required [(ngModel)]="demistoProperties.url" name="url" size="50">
+              <label for="url">Demisto Base URL</label>
+            </span>
+          </div>
+          
+          <!-- Demisto API Key -->
+          <div>
+            <span class="ui-float-label">
+              <input pInputText type="password" id="apiKey" required [(ngModel)]="demistoProperties.apiKey" name="apiKey" size="50" autocomplete="off">
+              <label for="apiKey">API Key</label>
+            </span>
+          </div>
+          
+          <!-- Trust Any Certificate -->
+          <div>
+            <span class="formLabel">Trust Any Certificate&nbsp;&nbsp;</span>
+            <p-inputSwitch name="trustAny" [(ngModel)]="demistoProperties.trustAny" [style]="{'vertical-align' : 'middle' }"></p-inputSwitch>
+          </div>
+    
+        </div>
+
+        <!-- Test Button -->
+        <div style="margin-top: .5em;">
+          <span><button pButton type="button" (click)="testAPI()" label="Test"></button>&nbsp;&nbsp;</span>
+          <p-message *ngIf="serverApiInit" severity="success" text="API Initialised"></p-message>
+          <p-message *ngIf="!serverApiInit" severity="error" text="API Not Initialised"></p-message>
+        </div>
+      </form>
+    </p-card>
+
+    
+
+
+    <form #newUserForm="ngForm" (ngSubmit)="onNewEmployeeFormSubmit(newUserForm)" novalidate>
+
+      <!-- Employee Details -->
+
+      <p-card header="New Employee Detail" subheader="This section will create a new Demisto incident with the intent of running a playbook for creating a new employee.  This playbook might seek the approval of HR, then create the new user's account in Active Directory, and finally it might then issue them a new laptop.  The workflow can be customised extensively.">
+        
+        <div class="demistoForm">
+
+          <!-- First Name -->
+          <div>
+            <span class="ui-float-label">
+              <input type="text" pInputText name="firstName" id="firstName" [(ngModel)]="employeeForm.firstName" required size="50" autocomplete="off"/>
+              <label for="firstName">First / Middle Name</label>
+            </span>
+          </div>
+
+          <!-- Last Name -->
+          <div>
+            <span class="ui-float-label">
+              <input type="text" pInputText name="lastName" id="lastName" [(ngModel)]="employeeForm.lastName" required size="50" autocomplete="off">
+              <label for="lastName">Last Name</label>
+            </span>
+          </div>
+
+          <!-- Hire Date -->
+          <div>
+            <p-calendar name="hireDate" [(ngModel)]="employeeForm.hireDate" [showIcon]="true" required autocomplete="off"></p-calendar>
+          </div>
+
+          <!-- Home 1 -->
+          <div>
+            <span class="ui-float-label">
+              <input pInputText type="text" name="homeAddressStreet" id="homeAddressStreet" [(ngModel)]="employeeForm.homeAddress.street1" size="50" required>
+              <label for="homeAddressStreet">Street</label>
+            </span>
+          </div>
+          
+          <!-- Home 2 -->
+          <div>
+            <span class="ui-float-label">
+              <input pInputText type="text" name="homeAddressStreet2" id="homeAddressStreet2" [(ngModel)]="employeeForm.homeAddress.street2" size="50"><br>
+              <label for="homeAddressStreet2">Street 2</label>
+            </span>
+          </div>
+
+          <!-- Country -->
+          <div>
+            <p-dropdown [options]="countries" name="homeAddressCountry" [(ngModel)]="employeeForm.homeAddress.country" optionLabel="name"></p-dropdown>
+          </div>
+          
+          <!-- City -->
+          <div>
+            <span class="ui-float-label">
+              <input pInputText type="text" name="homeAddressCity" id="homeAddressCity" [(ngModel)]="employeeForm.homeAddress.city" size="50" required><br>
+              <label for="homeAddressCity">City</label>
+            </span>
+          </div>
+              
+          <!-- State -->
+          <div>
+            <p-dropdown name="homeAddressState" [options]="clientOptions.countries[employeeForm.homeAddress.country.name].states" [(ngModel)]="employeeForm.homeAddress.state" optionLabel="display" dataKey="name"></p-dropdown>
+          </div>
+
+          <!-- ZIP / Postcode -->
+          <div>
+            <span class="ui-float-label">
+              <input pInputText type="text" name="homeAddressZip" id="homeAddressZip" [(ngModel)]="employeeForm.homeAddress.zip" size="50" required>
+              <label for="homeAddressZip">{{clientOptions.countries[employeeForm.homeAddress.country.name].zipLabel}}</label>
+            </span>
+          </div>
+
+          <!-- Home Phone -->
+          <div>
+            <span class="ui-float-label">
+              <input pInputText type="text" name="homePhone" id="homePhone" [(ngModel)]="employeeForm.phone.home" size="50">
+              <label for="homePhone">Home Phone</label>
+            </span>
+          </div>
+      
+          <!-- Mobile Phone -->
+          <div>
+            <span class="ui-float-label">
+              <input pInputText type="text" name="mobilePhone" id="mobilePhone" [(ngModel)]="employeeForm.phone.mobile" size="50">
+              <label for="mobilePhone">Mobile Phone</label>
+            </span>
+          </div>
+
+        </div>
+
+      </p-card>
+
+
+
+      <!-- Work Location Card -->
+      <p-card header="Work Location">
+        <p-dropdown [options]="workLocations" name="workLocation" [(ngModel)]="employeeForm.workLocation" optionLabel="name"></p-dropdown>
+      </p-card>
+
+
+
+      <!-- Computer Information Card -->
+      <p-card header="Computer Information">
+
+        <div class="demistoForm">
+
+          <!-- Computer Type -->
+          <div>
+            <span class="formLabel">Type:&nbsp;&nbsp;</span>
+            
+            <span *ngFor="let computerType of clientOptions.computerTypes | keyvalue">
+              <p-radioButton name="computerType" [label]="computerType.value.friendlyName" [value]="computerType.value.name" [(ngModel)]="employeeForm.computer.type"></p-radioButton>&nbsp;&nbsp;
+            </span>
+
+          </div>
+          
+          <!-- Computer Form Factor -->
+          <div>
+            <span class="formLabel">Form Factor:&nbsp;&nbsp;</span>
+
+            <span *ngIf="clientOptions.computerTypes[employeeForm.computer.type].laptops">
+              <p-radioButton name="formFactor" value="laptops" label="Laptop" [(ngModel)]="employeeForm.computer.formFactor"></p-radioButton>&nbsp;&nbsp;
+            </span>
+
+            <span *ngIf="clientOptions.computerTypes[employeeForm.computer.type].desktops">
+              <p-radioButton name="formFactor" value="desktops" label="Desktop" [(ngModel)]="employeeForm.computer.formFactor"></p-radioButton>&nbsp;&nbsp;
+            </span>
+            
+          </div>
+
+          <!-- Computer Model -->
+          <div>
+            <p-dropdown name="computerModel" [options]="computerTypes[employeeForm.computer.type][employeeForm.computer.formFactor]" [(ngModel)]="employeeForm.computer.model" optionLabel="name"></p-dropdown>
+          </div>
+
+        </div>
+
+      </p-card>
+
+
+
+      <!-- AD Groups Card -->
+      <p-card header="Active Directory Groups">
+        <span class="formLabel">Selected Groups: </span><span *ngFor="let group of employeeForm.adGroups" style="margin-right: 1em;color: white;">{{group}}</span><br><br>
+        <p-listbox name="adGroups" [options]="adGroups" [(ngModel)]="employeeForm.adGroups" [multiple]="true" [checkbox]="true" [filter]="false" [showToggleAll]="false" required></p-listbox>
+      </p-card>
+
+      <div style="margin-top: 1em;">
+        &nbsp;&nbsp;<button pButton type="submit" label="Submit" [disabled]="!serverApiInit || !employeeForm.firstName || !employeeForm.lastName || !employeeForm.hireDate || !employeeForm.homeAddress.street1 || !employeeForm.homeAddress.city || !employeeForm.homeAddress.state || !employeeForm.homeAddress.zip || !(employeeForm.phone.home || employeeForm.phone.mobile) || employeeForm.adGroups.length == 0"></button>
+        <button pButton type="button" (click)="resetForm()" label="Reset Form"></button>
+      </div>
+
+    </form>
+
+    <div>&nbsp;</div>
+
+  </div>
+
+  <div class="messagesContainer">
+    <p-messages [(value)]="messages"></p-messages>
+  </div>
+
+</ng-container>
+
+<ng-container *ngIf="!loggedInUser">
+  <div>
+    Could not obtain logged in user from API
+  </div>
+</ng-container>
