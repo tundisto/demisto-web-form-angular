@@ -69,7 +69,7 @@ These are the relevant details to enable the app to run successfully on the Demi
 
 ### Demisto API Key
 
-Before this app can be used, An API key must first be generated within Demisto. using `Settings -> Integrations -> API Keys -> Get Your Key`.  Enter this key and the server infornation into the 
+Before this app can be used, An API key must first be generated within Demisto. using `Settings -> Integrations -> API Keys -> Get Your Key`.  Enter this key and the server infornation into the Server Parameters section of the app.
 
 ### Note on Playbook
 
