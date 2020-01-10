@@ -1,8 +1,10 @@
+import { SelectItem } from 'primeng/api';
+
 interface Computer {
-  name: string;
-  friendlyName: string;
-  desktops?: string[];
-  laptops?: string[];
+  name?: string;
+  friendlyName?: string;
+  desktops: string[] | SelectItem[];
+  laptops: string[] | SelectItem[];
 }
 
 export interface ComputerTypes {

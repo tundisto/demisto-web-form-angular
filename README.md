@@ -1,6 +1,6 @@
 # demisto-web-form-angular
 
-This reference Angular project creates a Demisto incident through use of a web-based form.  The purpose is to trigger a playbook which will perform an automated action behind the scenes
+This reference Angular project creates a Demisto incident through use of a web-based form.  The purpose is to trigger a playbook which will perform an automated action behind the scenes.
 
 It consists of two main components:
 
@@ -9,11 +9,11 @@ It consists of two main components:
 
 ## PLEASE NOTE
 
-This is a simplistic, sample implementation, for reference purposes only. It is **NOT** intended for use in a production environment.  
+This is a simplistic, sample implementation, for reference purposes only. It is **NOT** intended for use in a production environment.  The app is written in such a way that the back end could potentially be modified to provide real data, but that is outside the scope of this project.
 
 ## SECURITY
 
-There is no authentication mechanism in this application for client communication.  Any user connecting to this app will be able to submit the form, assuming Demisto API communications have been initialised using a Demisto API key.
+There is no authentication mechanism in this application for client communication (though a 'dummy' user is shown in the form which is obtained through an API call to the server, similar to what may happen in a production app).  Any user connecting to this app will be able to submit the form, assuming Demisto API communications have been initialised using a Demisto API key.
 
 **ASSUME THAT THIS IMPLEMENTATION IS INSECURE** and that it will require numerous changes to be used in production.
 
@@ -67,13 +67,13 @@ These are the relevant details to enable the app to run successfully on the Demi
 | Computer Model | Short text |
 | Form Factor | Single select |
 
-### Demisto API Key
-
-Before this app can be used, An API key must first be generated within Demisto. using `Settings -> Integrations -> API Keys -> Get Your Key`.  Enter this key and the server infornation into the Server Parameters section of the app.
-
 ### Note on Playbook
 
 A playbook is not yet provided as part of this sample.  It will create a Demisto incident with the necessary fields, but a playbook would still beed to be built to perform any automated actions based on the form.
+
+### Demisto API Key
+
+Before this app can be used, An API key must first be generated within Demisto. using `Settings -> Integrations -> API Keys -> Get Your Key`.  Enter this key and the server infornation into the Demisto Parameters section of the app.
 
 ## Running the Node.js server
 
@@ -89,8 +89,8 @@ Run `npm start` to start the Angular client app in development mode, allowing li
 
 ## Building the Angular client
 
-Run `ng build` to build the project in development mode. The build artifacts will be stored in the `dist/` subdirectory. Use the `--prod` flag for a production build.
+Run `ng build` to build the project in development mode (this may fist require a global installation of the the Angular CLI with `sudo npm install -g @angular/cli`).  The build artifacts will be stored in the `dist/` subdirectory. Use the `--prod` flag for a production build.
 
 ## Connecting to the Application
 
-Browse to `http://<yourserverip>:4000` in your favourite web browser to launch the application.
+Browse to http://yourserver:4000 in your favourite web browser to launch the application.

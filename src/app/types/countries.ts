@@ -1,7 +1,7 @@
 interface State {
   abbreviation: string;
-  name: string;
-  display?: string;
+  value: string;
+  label: string;
 }
 
 

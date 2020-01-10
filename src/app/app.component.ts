@@ -7,6 +7,7 @@ import { ClientOptions } from './types/client-options';
 import { SelectItem } from 'primeng/api';
 import { NgForm } from '@angular/forms';
 import { DemistoCaseParams } from './types/demisto-case-params';
+import { ComputerTypes } from './types/computer-types';
 
 
 @Component({
@@ -38,10 +39,15 @@ export class AppComponent implements OnInit {
   // for p-messages
   messages = [];
 
+  // Options for PrimeNG Components
+  countries: SelectItem[] = [];
+  workLocations: SelectItem[] = [];
+  computerTypes: ComputerTypes = {};
+  adGroups: SelectItem[] = [];
+
   defaultComputerType = 'mac';
   defaultComputerFormFactor = 'laptops';
   defaultComputerModel = 'MacBook Pro 15"';
-  adGroups: SelectItem[] = [];
 
   defaultEmployeeForm: DemistoCaseParams = {
     firstName: null,
@@ -69,12 +75,7 @@ export class AppComponent implements OnInit {
   };
   employeeForm: DemistoCaseParams = JSON.parse(JSON.stringify(this.defaultEmployeeForm));
 
-  // Options for p-dropdowns
-  countries = [];
-  workLocations = [];
-  computerTypes: any = {};
-
-  testTimeout: any = null;
+  testTimeout: ReturnType<typeof setTimeout> = null;
 
 
 
@@ -82,19 +83,10 @@ export class AppComponent implements OnInit {
     this.employeeForm = JSON.parse(JSON.stringify(this.defaultEmployeeForm));
     this.employeeForm.computer.type = this.defaultComputerType;
     this.employeeForm.computer.formFactor = this.defaultComputerFormFactor;
-    this.computerTypes[this.defaultComputerType][this.defaultComputerFormFactor].forEach( model => {
-      if (model.name === this.defaultComputerModel) {
-        this.employeeForm.computer.model = model;
-      }
-    } );
-    this.countries.forEach(
-      country => {
-        if (country.name === this.clientOptions.defaultCountry) {
-          this.employeeForm.homeAddress.country = country;
-        }
-      });
-    (this.employeeForm.homeAddress as any).state = this.clientOptions.countries[this.clientOptions.defaultCountry].states[0];
-    this.employeeForm.workLocation = this.workLocations[0];
+    this.employeeForm.computer.model = this.defaultComputerModel;
+    this.employeeForm.homeAddress.country = this.clientOptions.defaultCountry;
+    this.employeeForm.homeAddress.state = this.clientOptions.countries[this.clientOptions.defaultCountry].states[0].value;
+    this.employeeForm.workLocation = this.workLocations[0].value;
   }
 
 
@@ -139,36 +131,22 @@ export class AppComponent implements OnInit {
       console.log('Client Options:', this.clientOptions);
 
       // AD Groups
-      this.clientOptions.activeDirectoryGroups.forEach( group => {
-        let item: SelectItem = {
-          label: group,
-          value: group
-        };
-        this.adGroups.push(item);
-      });
+      this.adGroups = this.clientOptions.activeDirectoryGroups.map( group => ({label: group, value: group}) );
       console.log('adGroups:', this.adGroups);
 
       // Countries
-      Object.keys(this.clientOptions.countries).forEach(
-         country => {
-           this.countries.push({name: country});
-         }
-      );
+      this.countries = Object.keys(this.clientOptions.countries).map( country => ({value: country, label: country}) );
       console.log('countries:', this.countries);
 
       // Work Locations
-      this.clientOptions.workLocations.forEach( location => this.workLocations.push( {name: location} ));
+      this.workLocations = this.clientOptions.workLocations.map( location => ({value: location, label: location}) );
 
       // Computer Models
       Object.keys(this.clientOptions.computerTypes).forEach( type => {
-        console.log('type:', type);
-        this.computerTypes[type] = {};
-        // desktops
-        this.computerTypes[type].desktops = [];
-        this.clientOptions.computerTypes[type].desktops.forEach( model => this.computerTypes[type].desktops.push( {name: model} ));
-        // laptops
-        this.computerTypes[type].laptops = [];
-        this.clientOptions.computerTypes[type].laptops.forEach( model => this.computerTypes[type].laptops.push( {name: model} ));
+        this.computerTypes[type] = {
+          desktops: (this.clientOptions.computerTypes[type].desktops as string[]).map(model => ({value: model, label: model}) ),
+          laptops: (this.clientOptions.computerTypes[type].laptops as string[]).map(model => ({value: model, label: model}) )
+        };
       });
       console.log('computerTypes:', this.computerTypes);
     }
@@ -245,10 +223,6 @@ export class AppComponent implements OnInit {
 
     // convert PrimeNG values to native values
     formCopy.hireDate = (this.employeeForm as any).hireDate.toISOString(); // convert date
-    formCopy.homeAddressCountry = formCopy.homeAddressCountry.name; // convert country
-    formCopy.homeAddressState = formCopy.homeAddressState.name; // convert state
-    formCopy.workLocation = formCopy.workLocation.name; // convert work location
-    formCopy.computerModel = formCopy.computerModel.name; // convert computer model
     console.log('formCopy:', formCopy);
 
     let res = await this.fetcherService.createDemistoIncident(formCopy);

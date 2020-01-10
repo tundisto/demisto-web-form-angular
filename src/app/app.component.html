@@ -104,7 +104,7 @@
 
           <!-- Country -->
           <div>
-            <p-dropdown [options]="countries" name="homeAddressCountry" [(ngModel)]="employeeForm.homeAddress.country" optionLabel="name"></p-dropdown>
+            <p-dropdown [options]="countries" name="homeAddressCountry" [(ngModel)]="employeeForm.homeAddress.country"></p-dropdown>
           </div>
           
           <!-- City -->
@@ -117,14 +117,14 @@
               
           <!-- State -->
           <div>
-            <p-dropdown name="homeAddressState" [options]="clientOptions.countries[employeeForm.homeAddress.country.name].states" [(ngModel)]="employeeForm.homeAddress.state" optionLabel="display" dataKey="name"></p-dropdown>
+            <p-dropdown name="homeAddressState" [options]="clientOptions.countries[employeeForm.homeAddress.country].states" [(ngModel)]="employeeForm.homeAddress.state"></p-dropdown>
           </div>
 
           <!-- ZIP / Postcode -->
           <div>
             <span class="ui-float-label">
               <input pInputText type="text" name="homeAddressZip" id="homeAddressZip" [(ngModel)]="employeeForm.homeAddress.zip" size="50" required>
-              <label for="homeAddressZip">{{clientOptions.countries[employeeForm.homeAddress.country.name].zipLabel}}</label>
+              <label for="homeAddressZip">{{clientOptions.countries[employeeForm.homeAddress.country].zipLabel}}</label>
             </span>
           </div>
 
@@ -152,7 +152,7 @@
 
       <!-- Work Location Card -->
       <p-card header="Work Location">
-        <p-dropdown [options]="workLocations" name="workLocation" [(ngModel)]="employeeForm.workLocation" optionLabel="name"></p-dropdown>
+        <p-dropdown [options]="workLocations" name="workLocation" [(ngModel)]="employeeForm.workLocation"></p-dropdown>
       </p-card>
 
 
@@ -188,7 +188,7 @@
 
           <!-- Computer Model -->
           <div>
-            <p-dropdown name="computerModel" [options]="computerTypes[employeeForm.computer.type][employeeForm.computer.formFactor]" [(ngModel)]="employeeForm.computer.model" optionLabel="name"></p-dropdown>
+            <p-dropdown name="computerModel" [options]="computerTypes[employeeForm.computer.type][employeeForm.computer.formFactor]" [(ngModel)]="employeeForm.computer.model"></p-dropdown>
           </div>
 
         </div>
