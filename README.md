@@ -89,7 +89,7 @@ Run `npm start` to start the Angular client app in development mode, allowing li
 
 ## Building the Angular client
 
-Run `ng build` to build the project in development mode (this may fist require a global installation of the the Angular CLI with `sudo npm install -g @angular/cli`).  The build artifacts will be stored in the `dist/` subdirectory. Use the `--prod` flag for a production build.
+Run `npm run ng -- build` to build the project in development mode (yes, there is a space between '--' and 'build').  The build artifacts will be stored in the `dist/` subdirectory. Add the `--prod` flag for a production build.
 
 ## Connecting to the Application
 
