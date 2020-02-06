@@ -60,7 +60,7 @@ const request = require('request-promise-native');
 // Express
 const express = require('express');
 const app = express();
-var server; // = require('http').createServer(app);
+var server;
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

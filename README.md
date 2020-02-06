@@ -91,6 +91,26 @@ Run `npm start` to start the Angular client app in development mode, allowing li
 
 Run `npm run ng -- build` to build the project in development mode (yes, there is a space between '--' and 'build').  The build artifacts will be stored in the `dist/` subdirectory. Add the `--prod` flag for a production build.
 
+## Running in Docker
+
+This is also distributed as a Docker image.
+
+### Create a container
+
+`docker create -p 4000:4000 --name demisto-web-form-angular demisto-web-form-angular:latest`
+
+### Start the conatiner:
+
+`docker start demisto-web-form-angular`
+
+### Stop the container:
+
+`docker stop demisto-web-form-angular`
+
+### Run a temporary container:
+
+`docker run -p 4000:4000 -ti --rm demisto-web-form-angular:latest`
+
 ## Connecting to the Application
 
 Browse to https://yourserver:4000 in your favourite web browser to launch the application.

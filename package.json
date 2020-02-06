@@ -1,12 +1,12 @@
 {
   "name": "demisto-web-form-angular",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "server": "cd server/src && node server.js",
     "server-dev": "cd server/src && node server.js --dev",
-    "build": "ng build",
+    "build": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
