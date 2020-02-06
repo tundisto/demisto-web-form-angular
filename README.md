@@ -15,7 +15,7 @@ This is a simplistic, sample implementation, for reference purposes only. It is 
 
 There is no authentication mechanism in this application for client communication (though a 'dummy' user is shown in the form which is obtained through an API call to the server, similar to what may happen in a production app).  Any user connecting to this app will be able to submit the form, assuming Demisto API communications have been initialised using a Demisto API key.
 
-**ASSUME THAT THIS IMPLEMENTATION IS INSECURE** and that it will require numerous changes to be used in production.
+**ASSUME THAT THIS IMPLEMENTATION IS INSECURE** and that it will require numerous changes to be used in production.  It does, however, make use of SSL and also encryption for the Demisto API key.
 
 ## Running for the First Time
 
@@ -77,11 +77,11 @@ Before this app can be used, An API key must first be generated within Demisto. 
 
 ## Running the Node.js server
 
-Run `npm run server` to start the Node.js server.  If the `dist/` subdirectory is found, the pre-compiled Angular application will be served statically from it.  If `dist/` isn't found, it will run in development mode by proxying http://localhost:4200.
+Run `npm run server` to start the Node.js server.  If the `dist/` subdirectory is found, the pre-compiled Angular application will be served statically from it.  If `dist/` isn't found, it will run in development mode by proxying the Angular development server.
 
 ## Running the Node.js server in development mode
 
-Use `npm run server-dev` to run the server in development mode, which will only proxy http://localhost:4200, rather than serving `dist/` statically.
+Use `npm run server-dev` to run the server in development mode, which will only proxy the Angular development server, rather than serving `dist/` statically.
 
 ## Running the Angular client in development mode
 
@@ -93,4 +93,4 @@ Run `npm run ng -- build` to build the project in development mode (yes, there i
 
 ## Connecting to the Application
 
-Browse to http://yourserver:4000 in your favourite web browser to launch the application.
+Browse to https://yourserver:4000 in your favourite web browser to launch the application.
