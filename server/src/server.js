@@ -4,6 +4,8 @@ console.log('Demisto case creation sample web form server for Angular is startin
 
 ////////////////////// Config and Imports //////////////////////
 
+const os = require('os');
+
 // Config parameters
 const listenPort = 4000;
 const proxyDest = 'http://localhost:4200'; // used in client development mode
@@ -17,7 +19,7 @@ const fs = require('fs');
 const defsDir = './definitions';
 const staticDir = '../../dist/demisto-form';
 const foundDist = fs.existsSync(staticDir); // check for presence of pre-built angular client directory
-const configDir = '../config';
+const configDir = '../etc';
 const apiCfgFile = configDir + '/api.json';
 const foundApiConfig = fs.existsSync(apiCfgFile); // check for presence of API configuration file
 
@@ -27,6 +29,19 @@ const countries = require(defsDir + '/countries');
 const defaultCountry = 'United States of America';
 const computerTypes = require(defsDir + '/computer-types');
 const activeDirectoryGroups = require(defsDir + '/ad-groups');
+
+// Certificates
+const sslDir = `${configDir}/certs`;
+const certFile = `${sslDir}/cert.pem`;
+var sslCert;
+const privKeyFile = `${sslDir}/cert.key`;
+var privKey;
+const internalPubKeyFile = `${sslDir}/internal.pem`;
+var internalPubKey;
+const internalKeyFile = `${sslDir}/internal.key`;
+
+// encryption
+var encryptor;
 
 // Load Sample Users
 const users = require(defsDir + '/users');
@@ -45,7 +60,7 @@ const request = require('request-promise-native');
 // Express
 const express = require('express');
 const app = express();
-const server = require('http').createServer(app);
+var server; // = require('http').createServer(app);
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -69,6 +84,13 @@ app.use(logConnection);
 app.get(apiPath + '/whoami', (req, res) => {
   let currentUser = randomElement(users);
   res.status(200).json( currentUser );
+});
+
+
+
+app.get(apiPath + '/publicKey', (req, res) => {
+  // sends the internal public key
+  res.json( { publicKey: internalPubKey } );
 });
 
 
@@ -167,7 +189,7 @@ app.post(apiPath + '/testConnect', async (req, res) => {
 
   // console.log('body:', req.body);
 
-  let testResult = await testApi(req.body.url, req.body.apiKey, req.body.trustAny);
+  let testResult = await testApi(req.body.url, decrypt(req.body.apiKey), req.body.trustAny);
   // console.debug('testResult:', testResult);
   if (!testResult.success) {
     let error = testResult.error;
@@ -304,7 +326,7 @@ app.post(apiPath + '/createDemistoIncident', async (req, res) => {
     url: demistoUrl + '/incident',
     method: 'POST',
     headers: {
-      Authorization: demistoApiKey,
+      Authorization: decrypt(demistoApiKey),
       Accept: 'application/json',
       'Content-Type': 'application/json'
     },
@@ -343,11 +365,191 @@ app.post(apiPath + '/createDemistoIncident', async (req, res) => {
 
 
 
+///// UTILITY FUNCTIONS //////
+
+
+
+function dos2unix(str) {
+  return str.replace(/\r\n/g, '\n');
+}
+
+
+
+function decrypt(str, encoding = 'utf8') {
+  return encryptor.decrypt(str, encoding);
+}
+
+
+
+function encrypt(str, encoding = 'utf8') {
+  return encryptor.encrypt(str, encoding);
+}
+
+
+
+function genInternalCerts() {
+  console.log('Generating internal certificate');
+  const selfsigned = require('selfsigned');
+  const attrs = [
+    {
+      name: 'commonName',
+      value: os.hostname
+    },
+    {
+      name: 'countryName',
+      value: 'US'
+    },
+    {
+      name: 'organizationName',
+      value: 'Demisto'
+    },
+    {
+      shortName: 'OU',
+      value: 'Demisto'
+    }
+  ];
+  const extensions = [
+    {
+      name: 'basicConstraints',
+      cA: true
+    },
+    {
+      name: 'keyUsage',
+      keyCertSign: true,
+      digitalSignature: true
+    },
+    {
+      name: 'extKeyUsage',
+      serverAuth: true
+    }
+  ];
+  const options = {
+    keySize: 2048,
+    days: 2653,
+    algorithm: 'sha512',
+    extensions
+  };
+  const pems = selfsigned.generate(attrs, options);
+  // console.log(pems);
+  fs.writeFileSync(internalPubKeyFile, dos2unix(pems.public), { encoding: 'utf8', mode: 0o660 });
+  fs.writeFileSync(internalKeyFile, dos2unix(pems.private), { encoding: 'utf8', mode: 0o660 });
+}
+
+
+
+function genSSLCerts() {
+  console.log('Generating SSL certificate');
+  const selfsigned = require('selfsigned');
+  const attrs = [
+    {
+      name: 'commonName',
+      value: os.hostname
+    },
+    {
+      name: 'countryName',
+      value: 'US'
+    },
+    {
+      name: 'organizationName',
+      value: 'Demisto'
+    },
+    {
+      shortName: 'OU',
+      value: 'Demisto'
+    }
+  ];
+  const extensions = [
+    {
+      name: 'basicConstraints',
+      cA: true
+    },
+    {
+      name: 'keyUsage',
+      keyCertSign: true,
+      digitalSignature: true
+    },
+    {
+      name: 'extKeyUsage',
+      serverAuth: true
+    }
+  ];
+  const options = {
+    keySize: 2048,
+    days: 825,
+    algorithm: 'sha512',
+    extensions
+  };
+  const pems = selfsigned.generate(attrs, options);
+  // console.log(pems);
+  fs.writeFileSync(certFile, dos2unix(pems.cert), { encoding: 'utf8', mode: 0o660 });
+  fs.writeFileSync(privKeyFile, dos2unix(pems.private), { encoding: 'utf8', mode: 0o660 });
+}
+
+
+
+function initSSL() {
+  
+  // SSL Certs
+  const privkeyExists = fs.existsSync(privKeyFile);
+  const certExists = fs.existsSync(certFile);
+  if (!privkeyExists && !certExists) {
+    genSSLCerts()
+  }
+  else if (!privkeyExists) {
+    console.error(`SSL private key file ${privKeyFile} not found`);
+    return false;
+  }
+  else if (!certExists) {
+    console.error(`SSL certificate file ${certFile} not found`);
+    return false;
+  }
+
+  sslCert = fs.readFileSync(certFile, { encoding: 'utf8' });
+  privKey = fs.readFileSync(privKeyFile, { encoding: 'utf8' });
+  server = require('https').createServer({
+    key: privKey,
+    cert: sslCert,
+  }, app);
+
+
+  // Internal Certs
+  const internalKeyExists = fs.existsSync(internalKeyFile);
+  const internalCertExists = fs.existsSync(internalPubKeyFile);
+  if (!internalKeyExists && !internalCertExists) {
+    genInternalCerts()
+  }
+  else if (!internalKeyExists) {
+    console.error(`Internal private key file ${internalKeyFile} not found`);
+    return false;
+  }
+  else if (!internalCertExists) {
+    console.error(`Internal certificate file ${internalPubKeyFile} not found`);
+    return false;
+  }
+
+  internalPubKey = fs.readFileSync(internalPubKeyFile, { encoding: 'utf8' });
+  const internalPrivKey = fs.readFileSync(internalKeyFile, { encoding: 'utf8' });
+
+  const NodeRSA = require('node-rsa');
+  encryptor = new NodeRSA( internalPrivKey );
+  encryptor.setOptions({encryptionScheme: 'pkcs1'});
+
+  return true;
+}
+
+
+
 
 
 ///// FINISH STARTUP //////
 
 (async function() {
+
+  if ( !initSSL() ) {
+    const exitCode = 1;
+    console.error(`SSL initialisation failed.  Exiting with code ${exitCode}`);
+    process.exit(exitCode);
+  }
   
   // Read API config
   if (!foundApiConfig) {
@@ -356,7 +558,7 @@ app.post(apiPath + '/createDemistoIncident', async (req, res) => {
   else {
     let apiPrefs = JSON.parse(fs.readFileSync(apiCfgFile, 'utf8'));
     if ('url' in apiPrefs && 'apiKey' in apiPrefs && 'trustAny' in apiPrefs) {
-      let testResult = await testApi(apiPrefs.url, apiPrefs.apiKey, apiPrefs.trustAny);
+      let testResult = await testApi(apiPrefs.url, decrypt(apiPrefs.apiKey), apiPrefs.trustAny);
       if (testResult.success) {
         demistoApiKey = apiPrefs.apiKey;
         demistoUrl = apiPrefs.url;
@@ -392,5 +594,5 @@ app.post(apiPath + '/createDemistoIncident', async (req, res) => {
     });
   }
 
-  server.listen(listenPort, () => console.log(`Listening on port ${listenPort}`)); // listen for client connections
+  server.listen(listenPort, () => console.log(`Listening for client connections at https://*:${listenPort}`)); // listen for client connections
 })();

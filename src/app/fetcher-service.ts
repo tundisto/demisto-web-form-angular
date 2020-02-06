@@ -7,6 +7,8 @@ import { ApiStatus } from './types/api-status';
 import { ClientOptions } from './types/client-options';
 import { DemistoCaseParams } from './types/demisto-case-params';
 
+declare var JSEncrypt: any;
+
 @Injectable()
 
 export class FetcherService {
@@ -18,6 +20,32 @@ export class FetcherService {
   demistoProperties: DemistoProperties; // gets set during test
   apiPath = '/api';
   currentUser: User;
+  private publicKey: string;
+  encryptor: any;
+
+
+
+  getPublicKey(): Promise<string> {
+    let headers = this.buildHeaders();
+    return this.http.get(this.apiPath + '/publicKey', { headers } )
+                    .toPromise()
+                    .then( (value: any) => this.publicKey = value.publicKey );
+  }
+
+
+
+  async initEncryption(): Promise<any> {
+    await this.getPublicKey();
+    this.encryptor = new JSEncrypt();
+    this.encryptor.setPublicKey(this.publicKey);
+  }
+
+
+
+  encrypt(str): string {
+    return this.encryptor.encrypt(str);
+  }
+
 
 
   getLoggedInUser(): Promise<User> {
@@ -74,6 +102,9 @@ export class FetcherService {
 
 
   testDemisto( demistoProperties: DemistoProperties ): Promise<any> {
+    if ('apiKey' in demistoProperties) {
+      demistoProperties.apiKey = this.encrypt(demistoProperties.apiKey);
+    }
     this.demistoProperties = demistoProperties;
     let headers = this.buildHeaders();
     // headers = headers.append('Authorization', this.demistoProperties.apiKey);
