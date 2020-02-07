@@ -1,7 +1,10 @@
 #!/bin/sh
 
+set -x
+
 IMAGE_NAME=demisto-web-form-angular
 DOCKER_USER=tundisto
+REGISTRY=docker.io
 
 VERSION=`grep version package.json | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]'`
 MAJOR=$(echo $VERSION | cut -d'.' -f1)
@@ -23,12 +26,12 @@ if [ ! $? -eq 0 ]; then
 fi
 
 # build docker image
-docker build -t ${IMAGE_NAME}:${VERSION} -t ${DOCKER_USER}/${IMAGE_NAME}:${VERSION} -t ${IMAGE_NAME}:latest -t ${DOCKER_USER}/${IMAGE_NAME}:latest .
+docker build -t ${IMAGE_NAME}:${VERSION} -t ${REGISTRY}/${DOCKER_USER}/${IMAGE_NAME}:${VERSION} -t ${IMAGE_NAME}:latest -t ${REGISTRY}/${DOCKER_USER}/${IMAGE_NAME}:latest .
 if [ ! $? -eq 0 ]; then
   echo "'docker build' failed"
   exit 1
 fi
 
 
-docker push ${DOCKER_USER}/${IMAGE_NAME}:${VERSION}
-docker push ${DOCKER_USER}/${IMAGE_NAME}:latest
+docker push ${REGISTRY}/${DOCKER_USER}/${IMAGE_NAME}:${VERSION}
+docker push ${REGISTRY}/${DOCKER_USER}/${IMAGE_NAME}:latest
