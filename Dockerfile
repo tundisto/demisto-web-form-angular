@@ -18,4 +18,4 @@ cd ${DESTDIR} \
 && npm install
 
 WORKDIR ${DESTDIR}/server/src
-CMD ["node", "server.js"]
+CMD ["/bin/sh", "-c", "node server.js"]
