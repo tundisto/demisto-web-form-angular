@@ -97,7 +97,7 @@ This is also distributed as a Docker image.
 
 ### Create a container
 
-`docker create -p 4000:4000 --name demisto-web-form-angular demisto-web-form-angular:latest`
+`docker create -p 4000:4000 --name demisto-web-form-angular tundisto/demisto-web-form-angular:latest`
 
 ### Start the conatiner:
 
@@ -109,7 +109,7 @@ This is also distributed as a Docker image.
 
 ### Run a temporary container:
 
-`docker run -p 4000:4000 -ti --rm demisto-web-form-angular:latest`
+`docker run -p 4000:4000 -ti --rm tundisto/demisto-web-form-angular:latest`
 
 ## Connecting to the Application
 
