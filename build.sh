@@ -25,8 +25,10 @@ if [ ! $? -eq 0 ]; then
   exit 1
 fi
 
+docker pull node:lts-alpine
+
 # build docker image
-docker build -t ${IMAGE_NAME}:${VERSION} -t ${IMAGE_NAME}:latest .
+docker build --no-cache=true -t ${IMAGE_NAME}:${VERSION} -t ${IMAGE_NAME}:latest .
 if [ ! $? -eq 0 ]; then
   echo "'docker build' failed"
   exit 1
