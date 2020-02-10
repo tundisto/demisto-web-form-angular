@@ -67,7 +67,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Logging
 function logConnection(req, res, next) {
-  // logs new client connections to the console 
+  // logs new client connections to the console
   let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   if (req.url.startsWith(apiPath) ) {
    console.log(`${req.method} ${req.url} from ${ip}`);
@@ -173,23 +173,31 @@ async function testApi(url, apiKey, trustAny) {
 app.post(apiPath + '/testConnect', async (req, res) => {
 
   // Tests for good connectivity to Demisto server by checking
-  // installed content.  If successful, future calls to the Demisto API will use the URL and API key set here.
-  
+  // installed content.  If successful, future calls to the Demisto API will use the URL and API key set here.  Future tests which preserve the URL and
+
   // check for client body fields
   if (! 'url' in req.body) {
     console.error('Client did not send url');
     res.send(400);
     return;
   }
-  if (! 'apiKey' in req.body) {
-    console.error('Client did not send apiKey');
+  let apiKey;
+  if (! 'apiKey' in req.body && demistoApiKey === '') {
+    console.error('Client did not send apiKey && key not previously set');
     res.send(400);
     return;
+  }
+  else if (! 'apiKey' in req.body && demistoApiKey !== '') {
+    apiKey = demistoApiKey;
+  }
+  else {
+    apiKey = req.body.apiKey;
   }
 
   // console.log('body:', req.body);
 
-  let testResult = await testApi(req.body.url, decrypt(req.body.apiKey), req.body.trustAny);
+  const testResult = await testApi(req.body.url, decrypt(apiKey), req.body.trustAny);
+
   // console.debug('testResult:', testResult);
   if (!testResult.success) {
     let error = testResult.error;
@@ -201,26 +209,18 @@ app.post(apiPath + '/testConnect', async (req, res) => {
     demistoUrl = '';
     demistoApiKey = '';
     trustAny = null;
-    
-    /*if ( error && 'response' in error && error.response && 'statusCode' in error.response && error.statusCode !== null) {
-      console.error('Caught error testing Demisto server:', error.response.statusMessage);
-      res.json( { success: false, statusCode: error.statusCode, statusMessage: error.response.statusMessage } );
-    }
-    else if (error && 'message' in error) {
-      console.error('Caught error testing Demisto server:', error.message);
-      res.json({ success: false, statusCode: null, error: error.message });
-    }*/
+
     if (error && statusCode) {
-      console.error(`Caught error testing Demisto server with code ${statusCode}:`, error);
+      console.info(`Demisto server test failed with code ${statusCode}:`, error);
       res.json({ success: false, statusCode, error });
     }
     else if (error && !statusCode) {
-      console.error(`Caught error testing Demisto server:`, error);
+      console.info(`Demisto server test failed:`, error);
       res.json({ success: false, error });
     }
     else {
-      console.error('Caught unspecified error testing Demisto server');
-      res.json({ success: false, error: 'unspecified' });
+      console.info('Demisto server test failed.  Unspecified error');
+      res.json({ success: false, error });
     }
     return;
   }
@@ -320,7 +320,7 @@ app.post(apiPath + '/createDemistoIncident', async (req, res) => {
   body.CustomFields['requestor'] = currentUser;
 
   // console.debug(body);
-  
+
   let result;
   let options = {
     url: demistoUrl + '/incident',
@@ -362,6 +362,16 @@ app.post(apiPath + '/createDemistoIncident', async (req, res) => {
   // console.debug(result);
   console.log(`User ${currentUser} created Demisto incident with id ${incidentId}`);
 } );
+
+
+
+function returnError(error, res, body = null, statusCode = 500 ) {
+  console.error(error);
+  if (!body) {
+    body = {success: false, error};
+  }
+  res.status(statusCode).json(body);
+}
 
 
 
@@ -488,7 +498,7 @@ function genSSLCerts() {
 
 
 function initSSL() {
-  
+
   // SSL Certs
   const privkeyExists = fs.existsSync(privKeyFile);
   const certExists = fs.existsSync(certFile);
@@ -550,7 +560,7 @@ function initSSL() {
     console.error(`SSL initialisation failed.  Exiting with code ${exitCode}`);
     process.exit(exitCode);
   }
-  
+
   // Read API config
   if (!foundApiConfig) {
     console.log('No Demisto API configuration was found');
@@ -582,10 +592,10 @@ function initSSL() {
   else {
     // Proxy client connections to the 'ng serve' instance
     console.log(`Enabling client development mode -- proxying Angular development server at ${proxyDest}`);
-    
+
     var proxy = require('express-http-proxy'); // express-http-proxy supports being tied to defined express routes
     app.use('/', proxy(proxyDest));
-    
+
     // proxy websockets to enable live reload - must use separate proxy lib
     var httpProxy = require('http-proxy');
     var wsProxy = httpProxy.createProxyServer({ ws: true });

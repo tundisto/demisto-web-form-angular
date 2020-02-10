@@ -16,7 +16,6 @@ export class FetcherService {
   constructor( private http: HttpClient ) {}
 
 
-
   demistoProperties: DemistoProperties; // gets set during test
   apiPath = '/api';
   currentUser: User;

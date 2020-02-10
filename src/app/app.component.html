@@ -2,7 +2,7 @@
 
   <div class="formContainer">
     <img src="/assets/demisto-logo-1.png" style="margin-top: 1em;">
-    
+
     <div style="margin-top: 1em; margin-right: 1em; float: right;">Logged in as: <span style="font-weight: bold;"> {{loggedInUser.username}}</span></div>
 
     <h1 class="bodyHeader">
@@ -20,7 +20,7 @@
       <form>
 
         <div class="demistoForm">
-          
+
           <!-- Demisto Base URL -->
           <div>
             <span class="ui-float-label">
@@ -28,7 +28,7 @@
               <label for="url">Demisto Base URL</label>
             </span>
           </div>
-          
+
           <!-- Demisto API Key -->
           <div>
             <span class="ui-float-label">
@@ -36,25 +36,25 @@
               <label for="apiKey">API Key</label>
             </span>
           </div>
-          
+
           <!-- Trust Any Certificate -->
           <div>
             <span class="formLabel">Trust Any Certificate&nbsp;&nbsp;</span>
             <p-inputSwitch name="trustAny" [(ngModel)]="demistoProperties.trustAny" [style]="{'vertical-align' : 'middle' }"></p-inputSwitch>
           </div>
-    
+
         </div>
 
         <!-- Test Button -->
         <div style="margin-top: .5em;">
-          <span><button pButton type="button" (click)="testAPI()" label="Test"></button>&nbsp;&nbsp;</span>
+          <span><button pButton type="button" (click)="testAPI()" label="Test" [disabled]="testButtonDisabled"></button>&nbsp;&nbsp;</span>
           <p-message *ngIf="serverApiInit" severity="success" text="API Initialised"></p-message>
           <p-message *ngIf="!serverApiInit" severity="error" text="API Not Initialised"></p-message>
         </div>
       </form>
     </p-card>
 
-    
+
 
 
     <form #newUserForm="ngForm" (ngSubmit)="onNewEmployeeFormSubmit(newUserForm)" novalidate>
@@ -62,7 +62,7 @@
       <!-- Employee Details -->
 
       <p-card header="New Employee Detail" subheader="This section will create a new Demisto incident with the intent of running a playbook for creating a new employee.  This playbook might seek the approval of HR, then create the new user's account in Active Directory, and finally it might then issue them a new laptop.  The workflow can be customised extensively.">
-        
+
         <div class="demistoForm">
 
           <!-- First Name -->
@@ -93,7 +93,7 @@
               <label for="homeAddressStreet">Street</label>
             </span>
           </div>
-          
+
           <!-- Home 2 -->
           <div>
             <span class="ui-float-label">
@@ -106,7 +106,7 @@
           <div>
             <p-dropdown [options]="countries" name="homeAddressCountry" [(ngModel)]="employeeForm.homeAddress.country"></p-dropdown>
           </div>
-          
+
           <!-- City -->
           <div>
             <span class="ui-float-label">
@@ -114,7 +114,7 @@
               <label for="homeAddressCity">City</label>
             </span>
           </div>
-              
+
           <!-- State -->
           <div>
             <p-dropdown name="homeAddressState" [options]="clientOptions.countries[employeeForm.homeAddress.country].states" [(ngModel)]="employeeForm.homeAddress.state"></p-dropdown>
@@ -135,7 +135,7 @@
               <label for="homePhone">Home Phone</label>
             </span>
           </div>
-      
+
           <!-- Mobile Phone -->
           <div>
             <span class="ui-float-label">
@@ -165,13 +165,13 @@
           <!-- Computer Type -->
           <div>
             <span class="formLabel">Type:&nbsp;&nbsp;</span>
-            
+
             <span *ngFor="let computerType of clientOptions.computerTypes | keyvalue">
               <p-radioButton name="computerType" [label]="computerType.value.friendlyName" [value]="computerType.value.name" [(ngModel)]="employeeForm.computer.type"></p-radioButton>&nbsp;&nbsp;
             </span>
 
           </div>
-          
+
           <!-- Computer Form Factor -->
           <div>
             <span class="formLabel">Form Factor:&nbsp;&nbsp;</span>
@@ -183,7 +183,7 @@
             <span *ngIf="clientOptions.computerTypes[employeeForm.computer.type].desktops">
               <p-radioButton name="formFactor" value="desktops" label="Desktop" [(ngModel)]="employeeForm.computer.formFactor"></p-radioButton>&nbsp;&nbsp;
             </span>
-            
+
           </div>
 
           <!-- Computer Model -->

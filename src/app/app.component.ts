@@ -35,6 +35,12 @@ export class AppComponent implements OnInit {
   clientOptions: ClientOptions;
   resultMessage: string;
   resultSuccess: boolean;
+  get testButtonDisabled(): boolean {
+    if (this.serverApiInit) {
+      return this.demistoProperties.url === '';
+    }
+    return this.demistoProperties.url === '' || this.demistoProperties.apiKey === '';
+  }
 
   // for p-messages
   messages = [];
@@ -164,7 +170,10 @@ export class AppComponent implements OnInit {
 
   async testAPI(): Promise<any> {
     try {
-      let result = await this.fetcherService.testDemisto(this.demistoProperties);
+      const demistoProperties = JSON.parse(JSON.stringify(this.demistoProperties));  // deep copy hack
+
+      const result = await this.fetcherService.testDemisto(demistoProperties);
+
       if (this.testTimeout) {
         clearTimeout(this.testTimeout);
         this.testTimeout = null;
@@ -183,7 +192,7 @@ export class AppComponent implements OnInit {
       }
       else if ( 'success' in result && !result.success ) {
         // unsuccessful
-        let err = 'statusMessage' in result ? result.statusMessage : result.error;
+        const err = 'statusMessage' in result ? result.statusMessage : result.error;
         if ('statusCode' in result) {
           this.testResult = `Test failed with code ${result.statusCode}: "${err}"`;
           this.messages = [{
